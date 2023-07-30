@@ -18,7 +18,7 @@ contract SynthEngine is ReentrancyGuard {
     // ---------- Types --------------
 
     // ---------- State Variables --------------
-    SyntheticAsset private immutable i_synth;
+    SyntheticAsset private immutable synth;
     uint256 private constant MIN_HEALTH_FACTOR = 1; // Define your minimum health factor
     uint256 private constant LIQUIDATION_THRESHOLD = 50; // Must be 200% over-collateralized
 
@@ -50,14 +50,14 @@ contract SynthEngine is ReentrancyGuard {
         for(uint256 i = 0; i < _tokenAddresses.length; i++){
             s_priceFeeds[_tokenAddresses[i]] = _priceFeedAddresses[i];
         }
-        i_synth = SyntheticAsset(_synthAddress);
+        synth = SyntheticAsset(_synthAddress);
     }
 
     // ---------- Public Functions --------------
     function mintSynth(uint256 _amountToMint) public moreThanZero(_amountToMint) nonReentrant {
         s_synthMinted[msg.sender] += _amountToMint;
         revertIfHealthFactorIsBroken(msg.sender);
-        bool minted = i_synth.mint(msg.sender, _amountToMint);
+        bool minted = synth.mint(msg.sender, _amountToMint);
 
         if(minted != true){
             revert SynthEngine__MintFailed();
