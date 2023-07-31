@@ -5,15 +5,24 @@ pragma solidity ^0.8.18;
  import "../lib/openzeppelin-contracts.git/contracts/token/ERC20/ERC20.sol";
 
 
+contract SyntheticAsset is ERC20{
+    address public owner;
 
-contract SyntheticAsset is ERC20 {
-    constructor() ERC20("Synthetic", "SYN") {
-        
+    constructor(string memory _name, string memory _symbol) ERC20(_name, _symbol) {
+        owner = msg.sender;
+    }
+
+    modifier onlyOwner {
+        require(msg.sender == owner);
+        _;
     }
     
-    function mint(address caller, uint256 amountToMint) public returns (bool){
-        _mint(caller, amountToMint);
-        return true;
+    function mint(address to, uint256 amount) public onlyOwner {
+        _mint(to, amount);
+    }
+
+    function burn(uint256 amount) public {
+        _burn(msg.sender, amount);
     }
    
     
