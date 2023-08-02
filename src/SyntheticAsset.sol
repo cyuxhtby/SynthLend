@@ -17,8 +17,9 @@ contract SyntheticAsset is ERC20{
         _;
     }
     
-    function mint(address to, uint256 amount) public onlyOwner {
+    function mint(address to, uint256 amount) public onlyOwner returns(bool) {
         _mint(to, amount);
+        return true;
     }
 
     function burn(uint256 amount) public {
