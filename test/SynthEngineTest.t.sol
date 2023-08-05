@@ -10,20 +10,8 @@ import "../script/HelperConfig.s.sol";
 
 contract SynthEngineTest is Test {
 
-    SynthEngine public synthEngine;
-    SyntheticAsset public synth;
-    HelperConfig public helperConfig;
-
-    address public xauUsdPriceFeed;
-    address public wbtcUsdPriceFeed;
-    address public jpyUsdPriceFeed;
-    address public gbpUsdPriceFeed;
-    address public wethUsdPriceFeed;
-    address public usdcUsdPriceFeed;
-
-    // TO DO: Build rest of test
-
-
-
-
+    function testMintSynth() public {
+     
+    }
+    
 }

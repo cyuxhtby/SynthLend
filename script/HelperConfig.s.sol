@@ -16,6 +16,7 @@ contract HelperConfig is Script {
     int256 public constant JPY_USD_PRICE = 100e8;
     int256 public constant GPB_USD_PRICE = 80e8;
     int256 public constant USDC_USD_PRICE = 2000e8;
+    int256 public constant CSPX_USD_PRICE = 80e8;
 
     struct NetworkConfig {
         address xauUsdPriceFeed;
@@ -24,6 +25,7 @@ contract HelperConfig is Script {
         address gbpUsdPriceFeed;
         address wethUsdPriceFeed;
         address usdcUsdPriceFeed;
+        address cspxUsdPriceFeed;
         uint256 deployerKey;
     }
 
@@ -45,6 +47,7 @@ contract HelperConfig is Script {
             gbpUsdPriceFeed: 0x91FAB41F5f3bE955963a986366edAcff1aaeaa83,
             wethUsdPriceFeed: 0x694AA1769357215DE4FAC081bf1f309aDC325306,
             usdcUsdPriceFeed: 0xA2F78ab2355fe2f984D808B5CeE7FD0A93D5270E,
+            cspxUsdPriceFeed: 0x4b531A318B0e44B549F3b2f824721b3D0d51930A, 
             deployerKey: DEFAULT_ANVIL_PRIVATE_KEY // find this
         });
     }
@@ -82,6 +85,9 @@ contract HelperConfig is Script {
         // USDC
         MockV3Aggregator usdcUsdPriceFeed = new MockV3Aggregator(DECIMALS, USDC_USD_PRICE);
         ERC20Mock usdcMock = new ERC20Mock("USDC", "USDC", msg.sender, 1000e8);
+
+        MockV3Aggregator cspxUsdPriceFeed = new MockV3Aggregator(DECIMALS, CSPX_USD_PRICE);
+        ERC20Mock cspxMock = new ERC20Mock("CSPX", "CSPX", msg.sender, 1000e8);
         
         vm.stopBroadcast();
 
@@ -92,6 +98,7 @@ contract HelperConfig is Script {
             gbpUsdPriceFeed: address(gbpUsdPriceFeed),
             wethUsdPriceFeed: address(ethUsdPriceFeed),
             usdcUsdPriceFeed: address(usdcUsdPriceFeed), 
+            cspxUsdPriceFeed: address(cspxUsdPriceFeed),
             deployerKey: DEFAULT_ANVIL_PRIVATE_KEY 
         });
     }
