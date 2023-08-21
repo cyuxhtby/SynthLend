@@ -2,7 +2,7 @@
 
 pragma solidity ^0.8.18;
 
-import "../lib/forge-std/src/Test.sol";
+import "../../lib/forge-std/src/Test.sol";
 
 contract SyntheticAssetTest is Test {
 
