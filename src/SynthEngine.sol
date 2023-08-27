@@ -1,18 +1,17 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.18;
 
+import "../lib/openzeppelin-contracts.git/contracts/security/ReentrancyGuard.sol";
 import "./CollateralManagement.sol";
-import "./MintBurn.sol";
+import "./SynthMintBurn.sol";
 import "./Liquidation.sol";
 
-contract SynthEngine {
-    
-    // Dependencies
+contract SynthEngine is ReentrancyGuard{
+
     CollateralManagement public collateralManager;
     SynthMintBurn public synthManager;
     Liquidation public liquidator;
 
-    // Constructor
     constructor(
         address _collateralManagerAddress,
         address _synthManagerAddress,
@@ -23,33 +22,43 @@ contract SynthEngine {
         liquidator = Liquidation(_liquidatorAddress);
     }
 
-    // Public Functions
-    function depositCollateralAndMintSynth(address _assetToMint, uint256 _amountToMint) external payable {
+   /*//////////////////////////////////////////////////////////////
+                            External Functions
+    //////////////////////////////////////////////////////////////*/
+
+    function depositCollateralAndMintSynth(address _assetToMint, uint256 _amountToMint) external payable nonReentrant{
         collateralManager.depositCollateral{value: msg.value}();
-        bool minted = synthManager.mintSynth(_assetToMint, _amountToMint, msg.sender, collateralManager.getCollateralDeposited(msg.sender));
-        require(minted, "Minting failed due to insufficient collateral or other reasons.");
+        synthManager.mintSynth(_assetToMint, _amountToMint, msg.sender, collateralManager.collateralDeposited(msg.sender)); 
     }
 
-    function redeemCollateral(uint256 _amount) external {
-        bool redeemed = collateralManager.redeemCollateral(_amount, msg.sender);
-        require(redeemed, "Redemption failed due to insufficient collateral or other reasons.");
+    function redeemCollateral(uint256 _amount) external nonReentrant {
+        collateralManager.redeemCollateral(_amount, msg.sender);
     }
 
-    function burnSynth(uint256 _amount, address _synthAsset) external {
-        bool burned = synthManager.burnSynth(_amount, _synthAsset, msg.sender);
-        require(burned, "Burn failed due to insufficient synth or other reasons.");
+    function burnSynth(uint256 _amount, address _synthAsset) external nonReentrant {
+        synthManager.burnSynth(_amount, _synthAsset, msg.sender);
     }
 
-    function executeLiquidation(address _user, uint256 _debtToCover, address _synthAsset) external {
+    function executeLiquidation(address _user, uint256 _debtToCover, address _synthAsset) external nonReentrant {
         uint256 userHealthFactor = calculateHealthFactor(_user);
-        bool liquidated = liquidator.liquidate(_user, _debtToCover, _synthAsset, userHealthFactor);
-        require(liquidated, "Liquidation failed due to health factor, insufficient synth, or other reasons.");
+        liquidator.liquidate(_user, _debtToCover, _synthAsset, userHealthFactor);
     }
 
-    // Private View Functions
+    /*//////////////////////////////////////////////////////////////
+                            Private Function
+    //////////////////////////////////////////////////////////////*/
+
+    /**
+     * @dev Calculates the health factor for a user.
+     * The health factor is defined as the ratio of total collateral deposited by the user to the total synth minted by the user, scaled by 1e18.
+     * This scaling ensures precision as Solidity does not support floating-point arithmetic.
+     * 
+     * @param _user The address of the user for whom the health factor is being calculated.
+     * @return Returns the computed health factor for the user.
+     */
     function calculateHealthFactor(address _user) private view returns (uint256) {
         uint256 totalSynthMinted = synthManager.getSynthMinted(_user, address(synthManager)); 
-        uint256 totalCollateralDeposited = collateralManager.getCollateralDeposited(_user);
-        return totalCollateralDeposited * 1e18 / totalSynthMinted;  // This is a simple health factor calculation. You can modify it based on your needs.
+        uint256 totalCollateralDeposited = collateralManager.collateralDeposited(_user);
+        return totalCollateralDeposited * 1e18 / totalSynthMinted; 
     }
 }

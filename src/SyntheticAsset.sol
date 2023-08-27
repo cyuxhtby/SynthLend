@@ -22,8 +22,9 @@ contract SyntheticAsset is ERC20{
         return true;
     }
 
-    function burn(uint256 amount) public {
+    function burn(uint256 amount) public returns(bool) {
         _burn(msg.sender, amount);
+        return true;
     }
    
     
